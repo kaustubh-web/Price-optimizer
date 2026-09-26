@@ -1,13 +1,8 @@
 const woocommerceService = require('../services/woocommerceService');
+const syncServices = require('../services/syncServices');
 
-/**
- * Controller for WooCommerce Store endpoints
- */
 class StoreController {
-  /**
-   * GET /api/store/connection-test
-   * Quickly verifies if credentials and URL are valid
-   */
+
   async testConnection(req, res) {
     try {
       const result = await woocommerceService.getProducts({ per_page: 1 });
@@ -27,10 +22,7 @@ class StoreController {
     }
   }
 
-  /**
-   * GET /api/store/products
-   * Fetches products combined with order history analytics
-   */
+
   async getProducts(req, res) {
     try {
       const page = parseInt(req.query.page || '1', 10);
@@ -52,6 +44,39 @@ class StoreController {
         success: false,
         message: 'Error fetching products from WooCommerce store',
         error: error.response?.data || error.message,
+      });
+    }
+  }
+
+  async syncStores(req, res) {
+    try {
+      const result = await syncServices.syncStoreData();
+      return res.status(200).json(result);
+    } catch (error) {
+      console.error('Store Sync Failed:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to sync wooCommerce data to PostgresSQL',
+        error: error.message,
+      });
+    }
+  }
+
+  async getDbproducts(req, res) {
+    try {
+      const products = await syncServices.getDbProducts();
+      return res.status(200).json({
+        success: true,
+        source: 'postgresql',
+        total: products.length,
+        data: products,
+      });
+    } catch (error) {
+      console.error('Error fetching PostgreSQL products:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'Error fetching products from PostgreSQL',
+        error: error.message,
       });
     }
   }
