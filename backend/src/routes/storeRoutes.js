@@ -11,4 +11,6 @@ router.post('/sync', (req, res) => storeController.syncStores(req, res));
 
 router.get('/db-products', (req, res) => storeController.getDbproducts(req, res));
 
+router.get('/products/:id/recommendation', (req, res) => storeController.getRecommendation(req, res));
+
 module.exports = router;

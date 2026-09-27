@@ -1,6 +1,9 @@
 const woocommerceService = require('../services/woocommerceService');
 const syncServices = require('../services/syncServices');
 
+const recommendationService = require('../services/recommendationService');
+
+
 class StoreController {
 
   async testConnection(req, res) {
@@ -76,6 +79,21 @@ class StoreController {
       return res.status(500).json({
         success: false,
         message: 'Error fetching products from PostgreSQL',
+        error: error.message,
+      });
+    }
+  }
+
+  async getRecommendation(req, res) {
+    try {
+      const { id } = req.params;
+      const result = await recommendationService.generateRecommendation(id);
+      return res.status(200).json({ success: true, data: result });
+    } catch (error) {
+      console.error('Recommendation failed:', error.message);
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to generate recommendation',
         error: error.message,
       });
     }

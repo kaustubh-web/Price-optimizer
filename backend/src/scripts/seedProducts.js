@@ -75,7 +75,7 @@ async function seed() {
     }
   }
 
-  // If products were created, create 2 realistic mock orders so order analytics are populated
+  
   if (createdProducts.length >= 2) {
     console.log('\n🧾 Creating sample completed orders to simulate store sales history...');
 

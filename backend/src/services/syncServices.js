@@ -2,27 +2,24 @@ const prisma = require('../config/prisma');
 const woocommerceService = require('./woocommerceService');
 
 class SyncService {
-    /**
-     * Syncs products and completed orders from WooCommerce into PostgreSQL
-     */
+   
     async syncStoreData() {
         console.log('🔄 Starting full sync from WooCommerce to PostgreSQL...');
 
-        // 1. Fetch fresh store data using our existing woocommerceService
+       
         const storeData = await woocommerceService.getProductsWithOrderAnalytics({ per_page: 100 });
         const { products } = storeData;
 
         let syncedProducts = 0;
         let priceHistoryEntries = 0;
 
-        // 2. Upsert each product and track price changes
+      
         for (const prod of products) {
             const wooId = prod.id;
             const currentPrice = prod.pricing.current_price;
             const regularPrice = prod.pricing.regular_price;
             const salePrice = prod.pricing.sale_price;
 
-            // Check if product already exists in Postgres
             const existingProduct = await prisma.product.findUnique({
                 where: { wooCommerceId: wooId },
                 include: {
@@ -30,10 +27,9 @@ class SyncService {
                         orderBy: { changedAt: 'desc' },
                         take: 1,
                     },
-                },
+                },  
             });
 
-            // Upsert product
             const savedProduct = await prisma.product.upsert({
                 where: { wooCommerceId: wooId },
                 update: {
@@ -67,8 +63,6 @@ class SyncService {
 
             syncedProducts++;
 
-            // Check if price history needs to be recorded:
-            // If new product OR latest recorded effective price != current price
             const latestHistory = existingProduct?.priceHistory?.[0];
             const hasPriceChanged = !latestHistory || latestHistory.effectivePrice !== currentPrice;
 
@@ -86,7 +80,6 @@ class SyncService {
             }
         }
 
-        // 3. Fetch and sync orders
         const ordersResult = await woocommerceService.getOrders({ per_page: 100 });
         let syncedOrders = 0;
 
@@ -116,14 +109,13 @@ class SyncService {
 
             syncedOrders++;
 
-            // Upsert order line items
             if (Array.isArray(order.line_items)) {
                 for (const item of order.line_items) {
                     const matchingProduct = await prisma.product.findUnique({
                         where: { wooCommerceId: item.product_id },
                     });
 
-                    // Check if item already exists for this order
+                   
                     const existingItem = await prisma.orderItem.findFirst({
                         where: {
                             orderId: savedOrder.id,
@@ -158,9 +150,7 @@ class SyncService {
         };
     }
 
-    /**
-     * Fetch all synced products from local PostgreSQL database
-     */
+    
     async getDbProducts() {
         return prisma.product.findMany({
             include: {

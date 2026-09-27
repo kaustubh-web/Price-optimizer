@@ -20,7 +20,7 @@ const woocommerce = new WooCommerceRestApi({
   consumerKey: WOOCOMMERCE_CONSUMER_KEY || '',
   consumerSecret: WOOCOMMERCE_CONSUMER_SECRET || '',
   version: 'wc/v3',
-  queryStringAuth: true, // Recommended for HTTPS & avoids server basic-auth header stripping
+  queryStringAuth: true, 
 });
 
 module.exports = woocommerce;
