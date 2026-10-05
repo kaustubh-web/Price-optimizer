@@ -2,7 +2,7 @@ const axios = require('axios');
 const { GoogleGenAI } = require('@google/genai');
 const prisma = require('../config/prisma');
 
-const ML_SERVICE_URL = process.env.ML_SERVICE_URL || 'http://localhost:8000';
+const ML_SERVICE_URL = (process.env.ML_SERVICE_URL || 'http://localhost:8000').trim().replace(/\/+$/, '');
 
 class RecommendationService {
 
@@ -45,9 +45,11 @@ class RecommendationService {
 
         const ml = mlResponse.data;
 
-        const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+        let rationale = '';
+        try {
+            const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
-        const prompt = `You are a pricing advisor for Indian e-commerce sellers.
+            const prompt = `You are a pricing advisor for Indian e-commerce sellers.
 
 Product: ${product.name}
 Category: ${category || 'General'}
@@ -59,11 +61,15 @@ Predicted Revenue Change: ${ml.predicted_revenue_change}%
 
 Write a 2-3 sentence recommendation for the seller explaining WHY they should change the price to Rs.${ml.recommended_price}, what will happen to their sales volume, and the expected revenue impact. Be specific, friendly, and practical. Use simple English.`;
 
-        const response = await ai.models.generateContent({
-            model: 'gemini-3.8-flash',
-            contents: prompt,
-        });
-        const rationale = response.text;
+            const response = await ai.models.generateContent({
+                model: 'gemini-2.0-flash',
+                contents: prompt,
+            });
+            rationale = response.text;
+        } catch (aiErr) {
+            console.error('Gemini API call failed, falling back to heuristic rationale:', aiErr.message);
+            rationale = `Based on demand elasticity analysis (${ml.elasticity_score}), adjusting the price to ₹${ml.recommended_price} is projected to increase demand by ${ml.predicted_demand_change}% and revenue by ${ml.predicted_revenue_change}%.`;
+        }
 
 
         const recommendation = await prisma.recommendation.create({
