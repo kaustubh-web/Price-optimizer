@@ -1,4 +1,8 @@
-const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/store';
+let rawUrl = (import.meta.env.VITE_API_URL || 'http://localhost:5000/api/store').trim().replace(/\/+$/, '');
+if (!rawUrl.endsWith('/api/store')) {
+    rawUrl = `${rawUrl}/api/store`;
+}
+const BASE_URL = rawUrl;
 
 export async function getProducts() {
     const res = await fetch(`${BASE_URL}/db-products`);

@@ -6,12 +6,21 @@ const app = express();
 
 // Middlewares
 app.use(cors({
-  origin: ['http://localhost:5173', process.env.FRONTEND_URL || '*'],
+  origin: true,
   credentials: true,
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+
+app.get('/', (req, res) => {
+  res.status(200).json({
+    status: 'online',
+    service: 'price-optimizer-backend',
+    health: '/api/health',
+    store: '/api/store',
+  });
+});
 
 app.get('/api/health', (req, res) => {
   res.status(200).json({
