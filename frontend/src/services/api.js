@@ -1,4 +1,4 @@
-const BASE_URL = 'http://localhost:5000/api/store';
+const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/store';
 
 export async function getProducts() {
     const res = await fetch(`${BASE_URL}/db-products`);
