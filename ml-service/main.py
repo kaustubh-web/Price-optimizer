@@ -36,6 +36,16 @@ class PredictResponse(BaseModel):
 
 # ── Endpoints ────────────────────────────────────────────────────────────────
 
+@app.get("/")
+def root():
+    return {
+        "status": "online",
+        "service": "Price Optimizer ML Service",
+        "docs": "/docs",
+        "health": "/health"
+    }
+
+
 @app.get("/health")
 def health_check():
     return {
