@@ -1,0 +1,176 @@
+.rec-panel {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.rec-panel--loading,
+.rec-panel--empty {
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    min-height: 300px;
+    gap: 16px;
+    color: var(--text-secondary);
+}
+
+.spinner-lg {
+    width: 36px;
+    height: 36px;
+    border-width: 3px;
+}
+
+.rec-empty-icon {
+    font-size: 48px;
+}
+
+.rec-panel--empty h3 {
+    font-size: 18px;
+    color: var(--text-primary);
+}
+
+.rec-panel--empty p {
+    font-size: 14px;
+    max-width: 280px;
+    color: var(--text-secondary);
+}
+
+.rec-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.rec-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: -0.5px;
+}
+
+.rec-product-name {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-top: 4px;
+}
+
+.rec-price-section {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    background: var(--bg-glass);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 20px 24px;
+}
+
+.rec-price-block {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1;
+}
+
+.rec-price-block--recommended {
+    align-items: flex-end;
+}
+
+.rec-price-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.rec-price-value {
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -1px;
+    color: var(--text-primary);
+}
+
+.rec-arrow {
+    font-size: 24px;
+    color: var(--text-muted);
+}
+
+.text-green {
+    color: var(--accent-green);
+}
+
+.text-amber {
+    color: var(--accent-amber);
+}
+
+.rec-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+}
+
+.stat-card {
+    border-radius: var(--radius-md);
+    padding: 16px;
+    border: 1px solid var(--border);
+}
+
+.stat-neutral {
+    background: var(--bg-glass);
+}
+
+.stat-green {
+    background: rgba(34, 197, 94, 0.08);
+    border-color: rgba(34, 197, 94, 0.2);
+}
+
+.stat-red {
+    background: rgba(239, 68, 68, 0.08);
+    border-color: rgba(239, 68, 68, 0.2);
+}
+
+.stat-amber {
+    background: rgba(245, 158, 11, 0.08);
+    border-color: rgba(245, 158, 11, 0.2);
+}
+
+.stat-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+}
+
+.stat-value {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.rec-rationale {
+    background: var(--bg-glass);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent-purple);
+    border-radius: var(--radius-md);
+    padding: 18px 20px;
+}
+
+.rec-rationale-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--accent-purple);
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.rec-rationale-text {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.7;
+}

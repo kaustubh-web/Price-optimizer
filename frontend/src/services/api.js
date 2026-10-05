@@ -14,6 +14,7 @@ export async function syncStores() {
 }
 
 export async function getRecommendation(productId) {
+    const res = await fetch(`${BASE_URL}/products/${productId}/recommendation`);
     const data = await res.json();
     if (!data.success) throw new Error(data.message);
     return data.data;
