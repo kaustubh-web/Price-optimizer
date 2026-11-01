@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="560" height="128" viewBox="0 0 560 128" fill="none" role="img" aria-label="Price Optimizer">
+  <title>Price Optimizer</title>
+  <g transform="translate(8 16)">
+    <rect width="96" height="96" rx="24" fill="#0b0b0c"/>
+    <path d="M16 74H80" stroke="#ffffff" stroke-opacity="0.28" stroke-width="3" stroke-linecap="round"/>
+    <path d="M42 36V74" stroke="#ffffff" stroke-opacity="0.28" stroke-width="3" stroke-linecap="round"/>
+    <path d="M16 70C27 70 31 28 42 28C56 28 63 58 80 66" stroke="#ffffff" stroke-width="7" stroke-linecap="round"/>
+    <circle cx="42" cy="28" r="9" fill="#eb6834"/>
+  </g>
+  <text x="132" y="68" fill="#0b0b0c" font-family="Geist, Inter, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="46" font-weight="600" letter-spacing="-1.2">Price Optimizer</text>
+  <text x="134" y="98" fill="#71717a" font-family="Geist, Inter, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="19" letter-spacing="-0.1">Revenue-maximising prices for WooCommerce</text>
+</svg>

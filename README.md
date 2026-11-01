@@ -1,4 +1,11 @@
-# ⚡ AI Price Optimizer
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/logo-dark.svg">
+    <img alt="Price Optimizer" src="docs/logo-light.svg" width="440">
+  </picture>
+</p>
+
+# AI Price Optimizer
 
 > **AI-Powered Dynamic Pricing Engine for Indian E-Commerce**  
 > Predict price elasticity of demand using machine learning and generate actionable seller strategies with Google Gemini GenAI.

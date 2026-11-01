@@ -5,16 +5,16 @@ import { Tooltip } from './ui/Tooltip';
 
 function Logo() {
   return (
-    <svg viewBox="0 0 32 32" className="size-7" aria-hidden="true">
-      <rect width="32" height="32" rx="8" className="fill-ink" />
+    <svg viewBox="0 0 96 96" className="size-7" aria-hidden="true">
+      <rect width="96" height="96" rx="24" className="fill-ink" />
       <path
-        d="M7 23C10 12 13.5 9 16 9s6 3 9 14"
+        d="M16 70C27 70 31 28 42 28C56 28 63 58 80 66"
         className="stroke-surface"
-        strokeWidth="2.5"
+        strokeWidth="8"
         strokeLinecap="round"
         fill="none"
       />
-      <circle cx="16" cy="9" r="3" className="fill-series-2 stroke-ink" strokeWidth="1.5" />
+      <circle cx="42" cy="28" r="10" className="fill-series-2" />
     </svg>
   );
 }
