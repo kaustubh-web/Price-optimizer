@@ -1,4 +1,11 @@
-# ⚡ AI Price Optimizer
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/logo-dark.svg">
+    <img alt="Price Optimizer" src="docs/logo-light.svg" width="440">
+  </picture>
+</p>
+
+# AI Price Optimizer
 
 > **AI-Powered Dynamic Pricing Engine for Indian E-Commerce**  
 > Predict price elasticity of demand using machine learning and generate actionable seller strategies with Google Gemini GenAI.
@@ -53,9 +60,9 @@ Pricing products in e-commerce often relies on manual guesswork or rigid discoun
 ┌──────────────────────────────┴──────────────────────────────┐
 │                    React 19 + Vite Frontend                 │
 │                                                             │
-│  • Dark-mode Glassmorphic Dashboard                         │
+│  • Light/dark dashboard (Tailwind CSS v4)                   │
 │  • Real-time AI Pricing Recommendations                     │
-│  • Interactive Elasticity & Revenue Metrics                 │
+│  • Revenue curve & price history charts (Recharts)          │
 │  • Deployed on Vercel Edge Network                          │
 └─────────────────────────────────────────────────────────────┘
 ```
@@ -67,9 +74,12 @@ Pricing products in e-commerce often relies on manual guesswork or rigid discoun
 - **Store Data Ingestion**: Automated synchronization pipeline mapping WooCommerce products, prices, and past customer purchase orders into normalized PostgreSQL tables.
 - **Price Elasticity Modeling**:
   $$\text{Elasticity } (\epsilon) = \frac{\% \Delta \text{ Demand}}{\% \Delta \text{ Price}}$$
-  Microservice determines whether demand is elastic ($|\epsilon| > 1$), inelastic ($|\epsilon| < 1$), or unitary, computing the revenue-maximizing price point.
-- **Gemini GenAI Strategic Explanations**: Synthesizes mathematical elasticity calculations into concise, executive-level seller recommendations in plain English.
-- **Modern Responsive Dashboard**: Custom CSS variables, dark-mode glassmorphic theme, responsive typography, and reactive loading states built with React 19.
+  Elasticity is fitted with a log-log regression over the prices each product has actually sold at (grouped from order lines). Thin fits are shrunk toward a category benchmark and bounded to a plausible range; with fewer than three distinct prices the benchmark is used directly. Every result carries a confidence level (low / medium / high).
+- **Revenue-Maximising Price**: Constant-elasticity demand has no interior revenue peak, so the optimiser uses a linear demand curve calibrated to the estimated elasticity at the current price. Its peak is
+  $$P^* = P_0 \cdot \frac{\epsilon - 1}{2\epsilon}$$
+  which lowers prices for elastic products ($|\epsilon| > 1$) and raises them for inelastic ones, limited to ±30% of the current price where the data has evidence. The service also returns the projected demand and revenue curve across that band.
+- **Gemini GenAI Strategic Explanations**: Synthesizes mathematical elasticity calculations into concise, executive-level seller recommendations in plain English, with a templated fallback when Gemini is unavailable.
+- **Dashboard**: Catalog search, per-product sales and price history, the projected revenue curve with current vs. recommended price (chart or table view), model confidence, light/dark themes, and a cold-start notice for the free-tier backend.
 
 ---
 
@@ -77,7 +87,7 @@ Pricing products in e-commerce often relies on manual guesswork or rigid discoun
 
 | Layer | Technologies | Purpose |
 |---|---|---|
-| **Frontend** | React 19, Vite, Vanilla CSS | High-performance SPA dashboard, zero bloated dependencies |
+| **Frontend** | React 19, Vite, Tailwind CSS v4, TanStack Query, Recharts, Radix UI, Motion, Sonner, Lucide | Dashboard UI, data fetching & caching, charts, accessible tooltips, toasts |
 | **Backend API** | Node.js, Express, Axios, CORS | Business logic, API routing, WooCommerce synchronization |
 | **Database** | PostgreSQL (Neon Serverless), Prisma 7 | Relational data persistence, schema migrations, and indexing |
 | **ML Microservice** | Python 3.11, FastAPI, Scikit-learn, Pandas, NumPy | Mathematical modeling of price elasticity and demand curves |
@@ -106,7 +116,7 @@ The database is managed with **Prisma ORM** on a serverless **Neon PostgreSQL** 
 | `GET` | `/api/health` | Health check for backend service |
 | `GET` | `/api/store/db-products` | Fetches all stored products from PostgreSQL |
 | `POST` | `/api/store/sync` | Pulls latest inventory & orders from WooCommerce API |
-| `GET` | `/api/store/products/:id/recommendation` | Executes full ML + Gemini pipeline for a product |
+| `POST` | `/api/store/products/:id/recommendation` | Runs the ML + Gemini pipeline for a product and stores the result (`GET` still accepted for older clients) |
 
 ### ML Service (`/`)
 
@@ -138,6 +148,7 @@ PORT=5000
 DATABASE_URL=postgresql://user:password@host/neondb?sslmode=require
 ML_SERVICE_URL=http://localhost:8000
 GEMINI_API_KEY=your_gemini_api_key
+GEMINI_MODEL=gemini-2.0-flash  # optional
 WOOCOMMERCE_URL=https://your-store.com
 WOOCOMMERCE_CONSUMER_KEY=ck_your_key
 WOOCOMMERCE_CONSUMER_SECRET=cs_your_secret
