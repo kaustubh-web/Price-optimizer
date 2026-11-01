@@ -59,7 +59,7 @@ class StoreController {
       console.error('Store Sync Failed:', error);
       return res.status(500).json({
         success: false,
-        message: 'Failed to sync wooCommerce data to PostgresSQL',
+        message: 'Failed to sync wooCommerce data to PostgreSQL',
         error: error.message,
       });
     }
@@ -91,7 +91,11 @@ class StoreController {
       return res.status(200).json({ success: true, data: result });
     } catch (error) {
       console.error('Recommendation failed:', error.response?.data || error.message);
-      return res.status(500).json({
+      if (error.status === 404) {
+        return res.status(404).json({ success: false, message: error.message });
+      }
+      const mlUnreachable = error.config?.url?.includes('/predict-demand') && !error.response;
+      return res.status(mlUnreachable ? 503 : 500).json({
         success: false,
         message: 'Failed to generate recommendation',
         error: error.response?.data || error.message,

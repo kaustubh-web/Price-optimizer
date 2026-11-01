@@ -123,15 +123,24 @@ class SyncService {
                         },
                     });
 
-                    if (!existingItem) {
+                    const itemData = {
+                        productId: matchingProduct ? matchingProduct.id : null,
+                        quantity: item.quantity || 1,
+                        // line_item.price is already the unit price; only derive it when missing
+                        priceAtPurchase: item.price != null
+                            ? parseFloat(item.price)
+                            : parseFloat(item.total || 0) / (item.quantity || 1),
+                        total: parseFloat(item.total || 0),
+                    };
+
+                    if (existingItem) {
+                        await prisma.orderItem.update({ where: { id: existingItem.id }, data: itemData });
+                    } else {
                         await prisma.orderItem.create({
                             data: {
+                                ...itemData,
                                 orderId: savedOrder.id,
-                                productId: matchingProduct ? matchingProduct.id : null,
                                 wooCommerceProductId: item.product_id,
-                                quantity: item.quantity || 1,
-                                priceAtPurchase: parseFloat(item.price || item.total || 0) / (item.quantity || 1),
-                                total: parseFloat(item.total || 0),
                             },
                         });
                     }

@@ -23,6 +23,11 @@ class PredictRequest(BaseModel):
     category: Optional[str] = ""
     price_history: Optional[List[PricePoint]] = []
 
+class CurvePoint(BaseModel):
+    price: float
+    demand_index: float     # 100 = demand at current price
+    revenue_index: float    # 100 = revenue at current price
+
 class PredictResponse(BaseModel):
     product_id: int
     product_name: str
@@ -31,7 +36,11 @@ class PredictResponse(BaseModel):
     elasticity_score: float
     predicted_demand_change: float    # percentage
     predicted_revenue_change: float   # percentage
-    confidence: str
+    confidence: str                   # "low" | "medium" | "high"
+    elasticity_source: str            # "fitted" | "category_prior"
+    data_points: int
+    r_squared: Optional[float] = None
+    demand_curve: List[CurvePoint]
 
 
 # ── Endpoints ────────────────────────────────────────────────────────────────
@@ -56,6 +65,9 @@ def health_check():
 
 @app.post("/predict-demand", response_model=PredictResponse)
 def predict_demand(payload: PredictRequest):
+    if payload.current_price <= 0:
+        raise HTTPException(status_code=422, detail="current_price must be positive")
+
     try:
         # Convert price history to (price, quantity) tuples
         price_qty_pairs = [
