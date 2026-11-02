@@ -121,7 +121,7 @@ function LatestOrders({ orders }) {
         description="All statuses; only completed and processing orders count as sales"
       />
       <div className="mt-3 overflow-x-auto border-t border-line">
-        <table className="w-full min-w-[640px] text-sm">
+        <table className="w-full min-w-160 text-sm">
           <thead className="bg-subtle/60 text-left text-xs text-ink-2">
             <tr>
               <th className="px-5 py-2 font-medium">Order</th>

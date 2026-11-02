@@ -3,6 +3,23 @@ const syncServices = require('../services/syncServices');
 
 const recommendationService = require('../services/recommendationService');
 
+/**
+ * Describes a failed WooCommerce API call in plain terms, or returns null if the
+ * error didn't come from the store (e.g. a database error).
+ */
+function describeStoreError(error) {
+  const storeUrl = process.env.WOOCOMMERCE_URL;
+  const isStoreCall = Boolean(storeUrl) && Boolean(error.config?.url?.includes(storeUrl));
+  if (!isStoreCall) return null;
+
+  if (error.response) {
+    const body = typeof error.response.data === 'string' ? error.response.data : '';
+    const title = body.match(/<title>([^<]+)<\/title>/i)?.[1]?.trim();
+    const detail = error.response.data?.message || title || error.message;
+    return `WooCommerce store responded with HTTP ${error.response.status}: ${detail}`;
+  }
+  return `Could not reach the WooCommerce store (${error.code || error.message})`;
+}
 
 class StoreController {
 
@@ -56,10 +73,15 @@ class StoreController {
       const result = await syncServices.syncStoreData();
       return res.status(200).json(result);
     } catch (error) {
-      console.error('Store Sync Failed:', error);
+      const storeError = describeStoreError(error);
+      console.error('Store Sync Failed:', storeError || error);
+      if (storeError) {
+        // The store, not this server or the database, is the problem: 502 Bad Gateway.
+        return res.status(502).json({ success: false, message: storeError });
+      }
       return res.status(500).json({
         success: false,
-        message: 'Failed to sync wooCommerce data to PostgreSQL',
+        message: 'Failed to save WooCommerce data to PostgreSQL',
         error: error.message,
       });
     }

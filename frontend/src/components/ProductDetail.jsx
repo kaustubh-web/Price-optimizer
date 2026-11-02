@@ -237,7 +237,7 @@ function SalesAndHistory({ product }) {
         <div className="border-t border-line">
           <h3 className="px-5 pb-1 pt-4 text-sm font-medium">Recent orders</h3>
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[480px] text-sm">
+            <table className="w-full min-w-120 text-sm">
               <thead className="text-left text-xs text-ink-3">
                 <tr>
                   <th className="px-5 py-2 font-medium">Date</th>

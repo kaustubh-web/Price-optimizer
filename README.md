@@ -160,6 +160,11 @@ Run backend:
 npm run dev
 ```
 
+No WooCommerce store? Fill the database with a demo catalog and ~5 months of orders instead. This **replaces all store data** in the database; without `--yes` it's a dry run that only prints what it would do:
+```bash
+npm run seed:demo -- --yes
+```
+
 ### 3. ML Service Setup
 ```bash
 cd ../ml-service
