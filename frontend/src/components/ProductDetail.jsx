@@ -1,16 +1,18 @@
 import { ArrowDownRight, ArrowRight, ArrowUpRight, Info, LoaderCircle, Minus, Play, TriangleAlert } from 'lucide-react';
 import { domAnimation, LazyMotion, m } from 'motion/react';
-import { lazy, Suspense } from 'react';
-import { formatINR, formatNumber, formatPercent, formatRelative } from '../lib/format';
+import { lazy, Suspense, useState } from 'react';
+import { formatDate, formatINR, formatNumber, formatPercent, formatRelative } from '../lib/format';
 import { describeElasticity, productSales } from '../lib/insights';
+import { productTimeline, stateName } from '../lib/sales';
 import { cn } from '../lib/utils';
 import { Button } from './ui/Button';
 import { Card, CardHeader } from './ui/Card';
+import { OrderStatus } from './ui/OrderStatus';
 import { Skeleton } from './ui/Skeleton';
 import { Tooltip } from './ui/Tooltip';
 
 // Recharts is most of the bundle; load it only once a chart is on screen.
-const PriceHistoryChart = lazy(() => import('./charts/PriceHistoryChart'));
+const ProductSalesChart = lazy(() => import('./charts/ProductSalesChart'));
 const RevenueCurveChart = lazy(() => import('./charts/RevenueCurveChart'));
 
 const fade = {
@@ -194,17 +196,23 @@ function NoAnalysis({ onRun, disabled }) {
 }
 
 function SalesAndHistory({ product }) {
+  const [now] = useState(() => Date.now());
   const sales = productSales(product);
-  const history = product.priceHistory ?? [];
+  const timeline = productTimeline(product, now);
+  const recentLines = [...(product.orderItems ?? [])]
+    .filter((item) => item.order)
+    .sort((a, b) => new Date(b.order.orderDate) - new Date(a.order.orderDate))
+    .slice(0, 6);
 
   return (
     <Card>
-      <CardHeader title="Sales and price history" description="From synced WooCommerce orders" />
-      <dl className="mt-3 grid grid-cols-3 gap-px border-y border-line bg-line">
+      <CardHeader title="Sales history" description="Completed and processing orders from WooCommerce" />
+      <dl className="mt-3 grid grid-cols-2 gap-px border-y border-line bg-line sm:grid-cols-4">
         {[
           ['Units sold', formatNumber(sales.units)],
           ['Orders', formatNumber(sales.orders)],
           ['Revenue', formatINR(sales.revenue)],
+          ['Avg. selling price', sales.units ? formatINR(sales.revenue / sales.units) : '—'],
         ].map(([label, value]) => (
           <div key={label} className="bg-surface px-5 py-3">
             <dt className="text-xs text-ink-3">{label}</dt>
@@ -212,19 +220,52 @@ function SalesAndHistory({ product }) {
           </div>
         ))}
       </dl>
-      <div className="px-2 pb-3 pt-3">
-        {history.length >= 2 ? (
-          <Suspense fallback={<Skeleton className="mx-3 h-[170px]" />}>
-            <PriceHistoryChart history={history} currentPrice={product.currentPrice} />
+
+      <div className="px-2 pb-2 pt-4">
+        {timeline.length > 1 ? (
+          <Suspense fallback={<Skeleton className="mx-3 h-72" />}>
+            <ProductSalesChart timeline={timeline} />
           </Suspense>
         ) : (
           <p className="px-3 py-4 text-[13px] text-ink-3">
-            {history.length === 1
-              ? `One price recorded since ${new Date(history[0].changedAt).toLocaleDateString('en-IN')}. History builds up as prices change between syncs.`
-              : 'No price history yet. It builds up as prices change between syncs.'}
+            Not enough history to chart yet. It builds up as orders come in and prices change between syncs.
           </p>
         )}
       </div>
+
+      {recentLines.length > 0 && (
+        <div className="border-t border-line">
+          <h3 className="px-5 pb-1 pt-4 text-sm font-medium">Recent orders</h3>
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[480px] text-sm">
+              <thead className="text-left text-xs text-ink-3">
+                <tr>
+                  <th className="px-5 py-2 font-medium">Date</th>
+                  <th className="px-3 py-2 font-medium">Customer</th>
+                  <th className="px-3 py-2 text-right font-medium">Qty × price</th>
+                  <th className="px-5 py-2 text-right font-medium">Status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-line">
+                {recentLines.map((item) => (
+                  <tr key={item.id}>
+                    <td className="whitespace-nowrap px-5 py-2 text-ink-2">{formatDate(item.order.orderDate)}</td>
+                    <td className="px-3 py-2 text-ink-2">
+                      {[item.order.customerCity, stateName(item.order.customerState)].filter(Boolean).join(', ') || '—'}
+                    </td>
+                    <td className="whitespace-nowrap px-3 py-2 text-right tabular-nums">
+                      {item.quantity} × {formatINR(item.priceAtPurchase, { precise: true })}
+                    </td>
+                    <td className="px-5 py-2 text-right">
+                      <OrderStatus status={item.order.status} />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
     </Card>
   );
 }

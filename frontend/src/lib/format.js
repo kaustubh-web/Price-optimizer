@@ -9,6 +9,9 @@ const inrCompact = new Intl.NumberFormat('en-IN', {
 const integer = new Intl.NumberFormat('en-IN');
 const relative = new Intl.RelativeTimeFormat('en', { numeric: 'auto' });
 const shortDate = new Intl.DateTimeFormat('en-IN', { day: 'numeric', month: 'short' });
+const monthShort = new Intl.DateTimeFormat('en-IN', { month: 'short' });
+const monthYear = new Intl.DateTimeFormat('en-IN', { month: 'short', year: 'numeric' });
+const fullDate = new Intl.DateTimeFormat('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
 
 export function formatINR(value, { precise = false } = {}) {
   if (value == null || Number.isNaN(value)) return '—';
@@ -31,6 +34,17 @@ export function formatPercent(value, { signed = true, digits = 1 } = {}) {
 
 export function formatShortDate(date) {
   return shortDate.format(new Date(date));
+}
+
+export function formatDate(date) {
+  return fullDate.format(new Date(date));
+}
+
+/** Axis tick (`long: false`) or tooltip title (`long: true`) for a timeline bucket. */
+export function formatBucket(start, unit, { long = false } = {}) {
+  if (unit === 'month') return (long ? monthYear : monthShort).format(new Date(start));
+  if (unit === 'week' && long) return `Week of ${shortDate.format(new Date(start))}`;
+  return shortDate.format(new Date(start));
 }
 
 const UNITS = [

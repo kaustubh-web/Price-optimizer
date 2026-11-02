@@ -11,6 +11,8 @@ router.post('/sync', (req, res) => storeController.syncStores(req, res));
 
 router.get('/db-products', (req, res) => storeController.getDbproducts(req, res));
 
+router.get('/db-orders', (req, res) => storeController.getDbOrders(req, res));
+
 // Runs the ML + Gemini pipeline and stores a new recommendation, so POST is canonical.
 // GET is kept so older frontend builds keep working.
 router.post('/products/:id/recommendation', (req, res) => storeController.getRecommendation(req, res));

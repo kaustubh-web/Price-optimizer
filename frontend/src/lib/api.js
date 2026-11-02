@@ -24,6 +24,11 @@ export async function getProducts() {
   return body.data;
 }
 
+export async function getOrders() {
+  const body = await request('/db-orders');
+  return body.data;
+}
+
 export async function syncStore() {
   return request('/sync', { method: 'POST' });
 }

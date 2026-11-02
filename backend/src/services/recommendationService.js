@@ -14,6 +14,9 @@ class NotFoundError extends Error {
     }
 }
 
+// Orders in these states represent real purchases; cancelled, refunded or failed ones don't.
+const COUNTED_STATUSES = new Set(['completed', 'processing']);
+
 const signed = (n) => `${n >= 0 ? '+' : ''}${Number(n).toFixed(1)}`;
 const rupees = (n) => `₹${Number(n).toLocaleString('en-IN', { maximumFractionDigits: 2 })}`;
 
@@ -27,6 +30,7 @@ class RecommendationService {
         const unitsByPrice = new Map();
         for (const item of orderItems) {
             if (!(item.priceAtPurchase > 0)) continue;
+            if (item.order && !COUNTED_STATUSES.has(item.order.status)) continue;
             const price = Math.round(item.priceAtPurchase);
             unitsByPrice.set(price, (unitsByPrice.get(price) || 0) + item.quantity);
         }
@@ -70,7 +74,7 @@ Write a 2-3 sentence recommendation for the seller explaining why the price shou
 
         const product = await prisma.product.findUnique({
             where: { id: productId },
-            include: { orderItems: true },
+            include: { orderItems: { include: { order: { select: { status: true } } } } },
         });
 
         if (!product) throw new NotFoundError(`Product ${productId} not found in database`);

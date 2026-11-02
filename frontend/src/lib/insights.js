@@ -1,3 +1,5 @@
+import { isCounted } from './sales';
+
 export function describeElasticity(e) {
   const magnitude = Math.abs(e);
   if (magnitude > 1.05) {
@@ -21,40 +23,11 @@ export function describeElasticity(e) {
 }
 
 export function productSales(product) {
-  const items = product.orderItems ?? [];
+  const items = (product.orderItems ?? []).filter((item) => !item.order || isCounted(item.order.status));
   return {
     units: items.reduce((sum, item) => sum + item.quantity, 0),
     orders: new Set(items.map((item) => item.orderId)).size,
     revenue: items.reduce((sum, item) => sum + item.total, 0),
-  };
-}
-
-export function catalogSummary(products) {
-  const orderIds = new Set();
-  let units = 0;
-  let revenue = 0;
-  let inStock = 0;
-  const upliftByProduct = [];
-
-  for (const product of products) {
-    if (product.stockStatus === 'instock') inStock++;
-    for (const item of product.orderItems ?? []) {
-      orderIds.add(item.orderId);
-      units += item.quantity;
-      revenue += item.total;
-    }
-    const latest = product.recommendations?.[0];
-    if (latest) upliftByProduct.push(latest.predictedRevenueChange);
-  }
-
-  return {
-    products: products.length,
-    inStock,
-    units,
-    orders: orderIds.size,
-    revenue,
-    analysed: upliftByProduct.length,
-    averageUplift: upliftByProduct.length ? upliftByProduct.reduce((a, b) => a + b, 0) / upliftByProduct.length : null,
   };
 }
 

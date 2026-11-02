@@ -24,6 +24,19 @@ class WooCommerceService {
   }
 
   /**
+   * Walk every page of a paginated endpoint. `fetchPage` is getProducts or getOrders.
+   */
+  async getAllPages(fetchPage, params = {}) {
+    const first = await fetchPage({ ...params, per_page: 100, page: 1 });
+    const data = [...first.data];
+    for (let page = 2; page <= first.totalPages; page++) {
+      const next = await fetchPage({ ...params, per_page: 100, page });
+      data.push(...next.data);
+    }
+    return data;
+  }
+
+  /**
    * Fetch list of orders
    */
   async getOrders(params = {}) {
@@ -38,6 +51,37 @@ class WooCommerceService {
       data: response.data,
       total: parseInt(response.headers['x-wp-total'] || '0', 10),
       totalPages: parseInt(response.headers['x-wp-totalpages'] || '1', 10),
+    };
+  }
+
+  /**
+   * Map a raw WooCommerce product to the fields and pricing shape used across the app.
+   */
+  normalizeProduct(prod) {
+    const regularPrice = parseFloat(prod.regular_price || prod.price || 0);
+    const salePrice = prod.sale_price ? parseFloat(prod.sale_price) : null;
+    const currentPrice = parseFloat(prod.price || 0);
+    const discountPercentage =
+      regularPrice > 0 && salePrice && salePrice < regularPrice
+        ? Math.round(((regularPrice - salePrice) / regularPrice) * 100)
+        : 0;
+
+    return {
+      id: prod.id,
+      name: prod.name,
+      slug: prod.slug,
+      sku: prod.sku || `SKU-${prod.id}`,
+      status: prod.status,
+      description: prod.short_description || prod.description,
+      categories: prod.categories ? prod.categories.map((c) => c.name) : [],
+      stock_status: prod.stock_status,
+      stock_quantity: prod.stock_quantity,
+      pricing: {
+        regular_price: regularPrice,
+        sale_price: salePrice,
+        current_price: currentPrice,
+        discount_percentage: discountPercentage,
+      },
     };
   }
 
@@ -98,37 +142,17 @@ class WooCommerceService {
 
     // 3. Normalize and enrich each product payload
     const enrichedProducts = products.map((prod) => {
-      const regularPrice = parseFloat(prod.regular_price || prod.price || 0);
-      const salePrice = prod.sale_price ? parseFloat(prod.sale_price) : null;
-      const currentPrice = parseFloat(prod.price || 0);
-      const discountPercentage =
-        regularPrice > 0 && salePrice && salePrice < regularPrice
-          ? Math.round(((regularPrice - salePrice) / regularPrice) * 100)
-          : 0;
+      const normalized = this.normalizeProduct(prod);
 
       const orderAnalytics = productOrderMetrics.get(prod.id) || {
         order_count: 0,
         units_sold: prod.total_sales || 0,
-        revenue: (prod.total_sales || 0) * currentPrice,
+        revenue: (prod.total_sales || 0) * normalized.pricing.current_price,
         order_history: [],
       };
 
       return {
-        id: prod.id,
-        name: prod.name,
-        slug: prod.slug,
-        sku: prod.sku || `SKU-${prod.id}`,
-        status: prod.status,
-        description: prod.short_description || prod.description,
-        categories: prod.categories ? prod.categories.map((c) => c.name) : [],
-        stock_status: prod.stock_status,
-        stock_quantity: prod.stock_quantity,
-        pricing: {
-          regular_price: regularPrice,
-          sale_price: salePrice,
-          current_price: currentPrice,
-          discount_percentage: discountPercentage,
-        },
+        ...normalized,
         analytics: {
           lifetime_units_sold: prod.total_sales || 0,
           orders_count: orderAnalytics.order_count,

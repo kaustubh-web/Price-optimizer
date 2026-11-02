@@ -70,7 +70,7 @@ function ListMessage({ icon: Icon, title, children }) {
   );
 }
 
-export function ProductList({ products, status, error, slowStart, selectedId, onSelect, onRetry, onSync, syncing }) {
+export function ProductList({ products, status, error, selectedId, onSelect, onRetry, onSync, syncing }) {
   const [query, setQuery] = useState('');
 
   const visible = useMemo(() => {
@@ -82,7 +82,7 @@ export function ProductList({ products, status, error, slowStart, selectedId, on
   }, [products, query]);
 
   return (
-    <Card className="flex flex-col overflow-hidden lg:max-h-[calc(100vh-8rem)]">
+    <Card className="flex flex-col overflow-hidden lg:max-h-[calc(100vh-10rem)]">
       <div className="flex items-center justify-between px-5 pt-4">
         <h2 className="text-sm font-medium">Catalog</h2>
         {status === 'success' && <span className="text-xs tabular-nums text-ink-3">{products.length} products</span>}
@@ -104,24 +104,17 @@ export function ProductList({ products, status, error, slowStart, selectedId, on
 
       <div className="min-h-0 flex-1 overflow-y-auto border-t border-line">
         {status === 'pending' && (
-          <>
-            {slowStart && (
-              <p className="border-b border-line bg-warning-soft px-5 py-3 text-xs leading-relaxed text-warning">
-                Waking up the server. Free-tier hosting sleeps when idle, so the first load can take up to a minute.
-              </p>
-            )}
-            <ul className="divide-y divide-line" aria-busy="true">
-              {Array.from({ length: 5 }, (_, i) => (
-                <li key={i} className="space-y-2 px-5 py-3.5">
-                  <div className="flex justify-between gap-6">
-                    <Skeleton className="h-4 flex-1" />
-                    <Skeleton className="h-4 w-14" />
-                  </div>
-                  <Skeleton className="h-3 w-1/2" />
-                </li>
-              ))}
-            </ul>
-          </>
+          <ul className="divide-y divide-line" aria-busy="true">
+            {Array.from({ length: 5 }, (_, i) => (
+              <li key={i} className="space-y-2 px-5 py-3.5">
+                <div className="flex justify-between gap-6">
+                  <Skeleton className="h-4 flex-1" />
+                  <Skeleton className="h-4 w-14" />
+                </div>
+                <Skeleton className="h-3 w-1/2" />
+              </li>
+            ))}
+          </ul>
         )}
 
         {status === 'error' && (

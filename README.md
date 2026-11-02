@@ -71,7 +71,7 @@ Pricing products in e-commerce often relies on manual guesswork or rigid discoun
 
 ## ✨ Key Features
 
-- **Store Data Ingestion**: Automated synchronization pipeline mapping WooCommerce products, prices, and past customer purchase orders into normalized PostgreSQL tables.
+- **Store Data Ingestion**: Automated synchronization pipeline mapping WooCommerce products, prices, and past customer purchase orders into normalized PostgreSQL tables. Every page of products and orders is synced, so the full sales history is available.
 - **Price Elasticity Modeling**:
   $$\text{Elasticity } (\epsilon) = \frac{\% \Delta \text{ Demand}}{\% \Delta \text{ Price}}$$
   Elasticity is fitted with a log-log regression over the prices each product has actually sold at (grouped from order lines). Thin fits are shrunk toward a category benchmark and bounded to a plausible range; with fewer than three distinct prices the benchmark is used directly. Every result carries a confidence level (low / medium / high).
@@ -79,7 +79,8 @@ Pricing products in e-commerce often relies on manual guesswork or rigid discoun
   $$P^* = P_0 \cdot \frac{\epsilon - 1}{2\epsilon}$$
   which lowers prices for elastic products ($|\epsilon| > 1$) and raises them for inelastic ones, limited to ±30% of the current price where the data has evidence. The service also returns the projected demand and revenue curve across that band.
 - **Gemini GenAI Strategic Explanations**: Synthesizes mathematical elasticity calculations into concise, executive-level seller recommendations in plain English, with a templated fallback when Gemini is unavailable.
-- **Dashboard**: Catalog search, per-product sales and price history, the projected revenue curve with current vs. recommended price (chart or table view), model confidence, light/dark themes, and a cold-start notice for the free-tier backend.
+- **Sales Overview**: Revenue, orders, units and average order value for 30 days / 90 days / 12 months / all time, each compared with the previous period; revenue over time; top products; sales by state; pricing opportunities ranked by projected uplift; and the latest orders with their status. Only completed and processing orders count as sales.
+- **Products & Pricing**: Catalog search; per-product units sold over time aligned above its list-price history, recent orders, the projected revenue curve with current vs. recommended price (chart or table view) and model confidence. Light/dark themes and a cold-start notice for the free-tier backend.
 
 ---
 
@@ -114,7 +115,8 @@ The database is managed with **Prisma ORM** on a serverless **Neon PostgreSQL** 
 | Method | Endpoint | Description |
 |---|---|---|
 | `GET` | `/api/health` | Health check for backend service |
-| `GET` | `/api/store/db-products` | Fetches all stored products from PostgreSQL |
+| `GET` | `/api/store/db-products` | Fetches all stored products with price history, order lines and latest recommendation |
+| `GET` | `/api/store/db-orders` | Fetches all stored orders with their line items, newest first |
 | `POST` | `/api/store/sync` | Pulls latest inventory & orders from WooCommerce API |
 | `POST` | `/api/store/products/:id/recommendation` | Runs the ML + Gemini pipeline for a product and stores the result (`GET` still accepted for older clients) |
 

@@ -84,6 +84,25 @@ class StoreController {
     }
   }
 
+  async getDbOrders(req, res) {
+    try {
+      const orders = await syncServices.getDbOrders();
+      return res.status(200).json({
+        success: true,
+        source: 'postgresql',
+        total: orders.length,
+        data: orders,
+      });
+    } catch (error) {
+      console.error('Error fetching PostgreSQL orders:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'Error fetching orders from PostgreSQL',
+        error: error.message,
+      });
+    }
+  }
+
   async getRecommendation(req, res) {
     try {
       const { id } = req.params;

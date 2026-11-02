@@ -7,8 +7,8 @@ class SyncService {
         console.log('🔄 Starting full sync from WooCommerce to PostgreSQL...');
 
        
-        const storeData = await woocommerceService.getProductsWithOrderAnalytics({ per_page: 100 });
-        const { products } = storeData;
+        const rawProducts = await woocommerceService.getAllPages((params) => woocommerceService.getProducts(params));
+        const products = rawProducts.map((prod) => woocommerceService.normalizeProduct(prod));
 
         let syncedProducts = 0;
         let priceHistoryEntries = 0;
@@ -80,10 +80,10 @@ class SyncService {
             }
         }
 
-        const ordersResult = await woocommerceService.getOrders({ per_page: 100 });
+        const orders = await woocommerceService.getAllPages((params) => woocommerceService.getOrders(params));
         let syncedOrders = 0;
 
-        for (const order of ordersResult.data) {
+        for (const order of orders) {
             const orderDate = new Date(order.date_created || Date.now());
 
             const savedOrder = await prisma.order.upsert({
@@ -166,13 +166,30 @@ class SyncService {
                 priceHistory: {
                     orderBy: { changedAt: 'desc' },
                 },
-                orderItems: true,
+                orderItems: {
+                    include: {
+                        order: {
+                            select: { orderDate: true, status: true, customerCity: true, customerState: true },
+                        },
+                    },
+                },
                 recommendations: {
                     orderBy: { createdAt: 'desc' },
                     take: 1,
                 },
             },
             orderBy: { updatedAt: 'desc' },
+        });
+    }
+
+    async getDbOrders() {
+        return prisma.order.findMany({
+            include: {
+                items: {
+                    include: { product: { select: { id: true, name: true } } },
+                },
+            },
+            orderBy: { orderDate: 'desc' },
         });
     }
 }

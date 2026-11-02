@@ -1,4 +1,5 @@
-import { Moon, RefreshCw, Sun } from 'lucide-react';
+import * as Tabs from '@radix-ui/react-tabs';
+import { ChartColumn, Moon, Package, RefreshCw, Sun } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { Button } from './ui/Button';
 import { Tooltip } from './ui/Tooltip';
@@ -55,6 +56,26 @@ export function AppHeader({ status, onSync, syncing, theme, onToggleTheme }) {
           </Button>
         </div>
       </div>
+
+      <Tabs.List aria-label="Sections" className="mx-auto flex max-w-7xl gap-1 px-2.5 sm:px-4.5">
+        {[
+          ['overview', 'Overview', ChartColumn],
+          ['products', 'Products & pricing', Package],
+        ].map(([value, label, Icon]) => (
+          <Tabs.Trigger
+            key={value}
+            value={value}
+            className={cn(
+              'relative flex h-10 items-center gap-1.5 rounded-md px-2.5 text-sm text-ink-3 transition-colors hover:text-ink',
+              'data-[state=active]:text-ink data-[state=active]:after:absolute data-[state=active]:after:inset-x-2.5',
+              'data-[state=active]:after:-bottom-px data-[state=active]:after:h-0.5 data-[state=active]:after:rounded-full data-[state=active]:after:bg-ink',
+            )}
+          >
+            <Icon className="size-4" aria-hidden="true" />
+            {label}
+          </Tabs.Trigger>
+        ))}
+      </Tabs.List>
     </header>
   );
 }
